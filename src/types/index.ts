@@ -5,10 +5,13 @@ export type MuscleGroup =
   | 'biceps'
   | 'triceps'
   | 'legs'
+  | 'hamstrings'
+  | 'calves'
   | 'glutes'
   | 'core'
   | 'cardio'
-  | 'full-body';
+  | 'full-body'
+  | 'ankle';
 
 export type Difficulty = 'beginner' | 'intermediate' | 'advanced';
 
@@ -21,7 +24,19 @@ export type Equipment =
   | 'pull-up-bar'
   | 'bench'
   | 'machine'
-  | 'cable';
+  | 'cable'
+  | 'foam-roller'
+  | 'balance-board';
+
+export type ExerciseTag =
+  | 'football'
+  | 'injury-prevention'
+  | 'eccentric'
+  | 'plyometric'
+  | 'proprioception'
+  | 'strength'
+  | 'mobility'
+  | 'stability';
 
 export interface Exercise {
   id: string;
@@ -35,6 +50,7 @@ export interface Exercise {
   tips: string[];
   calsBurnedPerMin: number;
   emoji: string;
+  tags: ExerciseTag[];
 }
 
 export interface WorkoutExercise {
@@ -53,3 +69,4 @@ export interface Workout {
 }
 
 export type AppView = 'library' | 'builder' | 'runner';
+export type FilterCategory = 'all' | 'football' | 'injury-prevention' | 'strength';

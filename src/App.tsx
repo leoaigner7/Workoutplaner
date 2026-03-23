@@ -63,7 +63,14 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#06070f] flex flex-col" style={{ fontFamily: "'Inter', sans-serif" }}>
+    <div className="min-h-screen flex flex-col" style={{
+      fontFamily: "'Inter', sans-serif",
+      background: '#06070f',
+      backgroundImage: `
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(99,102,241,0.08) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 30% at 80% 60%, rgba(139,92,246,0.04) 0%, transparent 50%)
+      `,
+    }}>
 
       {/* ══ HEADER ══════════════════════════════════════════════════════════ */}
       <header className="sticky top-0 z-50 border-b border-white/[0.06] bg-[#06070f]/90 backdrop-blur-xl">

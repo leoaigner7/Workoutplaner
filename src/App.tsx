@@ -1,8 +1,10 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { Play, ListChecks, Clock, Zap, ChevronRight, Dumbbell, Activity } from 'lucide-react';
 import { ExerciseLibrary } from './components/ExerciseLibrary';
 import { WorkoutBuilder } from './components/WorkoutBuilder';
 import { WorkoutRunner } from './components/WorkoutRunner';
+import { HeroSection } from './components/HeroSection';
+import { exercises } from './data/exercises';
 import type { Exercise, WorkoutExercise } from './types';
 import './index.css';
 
@@ -14,6 +16,7 @@ function generateId() {
 
 function App() {
   const [tab, setTab]           = useState<Tab>('library');
+  const libraryRef              = useRef<HTMLDivElement>(null);
   const [running, setRunning]   = useState(false);
   const [workoutName, setWorkoutName]             = useState('Mein Workout');
   const [workoutExercises, setWorkoutExercises]   = useState<WorkoutExercise[]>([]);
@@ -121,8 +124,17 @@ function App() {
         </div>
       </header>
 
+      {/* ── HERO ───────────────────────────────────────────────────────── */}
+      {tab === 'library' && (
+        <HeroSection
+          totalExercises={exercises.length}
+          onStartWorkout={() => workoutExercises.length > 0 ? setRunning(true) : libraryRef.current?.scrollIntoView({ behavior: 'smooth' })}
+          onExplore={() => libraryRef.current?.scrollIntoView({ behavior: 'smooth' })}
+        />
+      )}
+
       {/* ── CONTENT ────────────────────────────────────────────────────── */}
-      <div className="flex-1 max-w-[1600px] mx-auto w-full px-6 py-6">
+      <div ref={libraryRef} className="flex-1 max-w-[1600px] mx-auto w-full px-6 py-6">
         {tab === 'library' ? (
           <div className="flex gap-6">
             <div className="flex-1 min-w-0">

@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useCallback } from 'react';
 import { Search, Plus, Check } from 'lucide-react';
 import { exercises } from '../data/exercises';
 import type { Exercise, MuscleGroup, Difficulty, ExerciseTag } from '../types';
@@ -71,19 +71,50 @@ function getImgStyle(e: Exercise): ImgStyle {
 }
 
 /* ── Exercise Card ───────────────────────────────────────────── */
-function ExerciseCard({ exercise: ex, onAdd, isAdded }: { exercise: Exercise; onAdd: () => void; isAdded: boolean }) {
+function ExerciseCard({ exercise: ex, onAdd, isAdded, index }: {
+  exercise: Exercise; onAdd: () => void; isAdded: boolean; index: number;
+}) {
   const diff    = difficultyConfig[ex.difficulty];
   const img     = getImgStyle(ex);
   const keyTags = ex.tags.filter(t => t !== 'strength').slice(0, 2);
   const steps   = ex.instructions.slice(0, 4);
   const tip     = ex.tips[0];
+  const cardRef = useRef<HTMLElement>(null);
+  const [showPlus, setShowPlus] = useState(false);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    const el = cardRef.current; if (!el) return;
+    const r  = el.getBoundingClientRect();
+    const x  = ((e.clientX - r.left)  / r.width  - 0.5) * 2;
+    const y  = ((e.clientY - r.top)   / r.height - 0.5) * 2;
+    el.style.transform = `perspective(900px) rotateX(${y * -5}deg) rotateY(${x * 5}deg) scale3d(1.015,1.015,1.015)`;
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    const el = cardRef.current; if (!el) return;
+    el.style.transform = '';
+  }, []);
+
+  const handleAdd = useCallback(() => {
+    if (isAdded) return;
+    onAdd();
+    setShowPlus(true);
+    setTimeout(() => setShowPlus(false), 750);
+  }, [isAdded, onAdd]);
 
   return (
-    <article className={`flex flex-col bg-white rounded-2xl overflow-hidden transition-all duration-200 group ${
-      isAdded
-        ? 'ring-2 ring-teal-400 shadow-lg shadow-teal-100'
-        : 'shadow-[0_1px_3px_rgba(0,0,0,0.07),0_4px_16px_rgba(0,0,0,0.05)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.10),0_8px_32px_rgba(0,0,0,0.08)] hover:-translate-y-0.5'
-    }`}>
+    <article ref={cardRef}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      className={`tilt-card card-animate flex flex-col bg-white rounded-2xl overflow-hidden ${
+        isAdded ? 'ring-2 ring-teal-400' : ''
+      }`}
+      style={{
+        animationDelay: `${index * 0.055}s`,
+        boxShadow: isAdded
+          ? '0 0 0 2px #2dd4bf, 0 8px 24px rgba(13,148,136,0.15)'
+          : '0 1px 3px rgba(0,0,0,0.07), 0 4px 16px rgba(0,0,0,0.05)',
+      }}>
 
       {/* ── IMAGE AREA ── */}
       <div className={`relative h-[140px] ${img.bg} flex flex-col justify-between p-4 overflow-hidden flex-shrink-0`}>
@@ -165,14 +196,22 @@ function ExerciseCard({ exercise: ex, onAdd, isAdded }: { exercise: Exercise; on
         <div className="flex-1" />
 
         {/* Add button */}
-        <button onClick={onAdd} disabled={isAdded}
-          className={`w-full py-2.5 rounded-xl text-[13px] font-bold flex items-center justify-center gap-2 transition-all duration-200 ${
-            isAdded
-              ? 'bg-teal-50 text-teal-600 ring-1 ring-teal-200 cursor-default'
-              : 'bg-teal-600 hover:bg-teal-500 text-white shadow-md shadow-teal-100 hover:scale-[1.02] active:scale-[0.98]'
-          }`}>
-          {isAdded ? <><Check size={14} /> Hinzugefügt</> : <><Plus size={14} /> Zum Workout hinzufügen</>}
-        </button>
+        <div className="relative">
+          {showPlus && (
+            <div className="animate-float-up absolute left-1/2 -top-4 -translate-x-1/2 z-20
+              text-teal-600 font-black text-xl pointer-events-none select-none">
+              +1
+            </div>
+          )}
+          <button onClick={handleAdd} disabled={isAdded}
+            className={`w-full py-2.5 rounded-xl text-[13px] font-bold flex items-center justify-center gap-2 transition-all duration-200 ${
+              isAdded
+                ? 'bg-teal-50 text-teal-600 ring-1 ring-teal-200 cursor-default'
+                : 'bg-teal-600 hover:bg-teal-500 text-white shadow-md shadow-teal-100 hover:scale-[1.02] active:scale-[0.98]'
+            }`}>
+            {isAdded ? <><Check size={14} /> Hinzugefügt</> : <><Plus size={14} /> Zum Workout hinzufügen</>}
+          </button>
+        </div>
       </div>
     </article>
   );
@@ -314,9 +353,9 @@ export function ExerciseLibrary({ onAddExercise, addedIds }: Props) {
             <p className="text-slate-400 text-sm">Andere Suchbegriffe oder Filter versuchen</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-            {filtered.map(ex => (
-              <ExerciseCard key={ex.id} exercise={ex} onAdd={() => onAddExercise(ex)} isAdded={addedIds.has(ex.id)} />
+          <div key={`${category}-${filterDiff}-${search}`} className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+            {filtered.map((ex, i) => (
+              <ExerciseCard key={ex.id} exercise={ex} index={i} onAdd={() => onAddExercise(ex)} isAdded={addedIds.has(ex.id)} />
             ))}
           </div>
         )}

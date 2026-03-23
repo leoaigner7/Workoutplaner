@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - claude/workout-planner-app-oqHjz
   workflow_dispatch:
 
 permissions:

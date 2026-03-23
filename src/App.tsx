@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { Play, BookOpen, ListChecks, Clock, Activity } from 'lucide-react';
+import { Play, ListChecks, Clock, Zap, ChevronRight, Dumbbell } from 'lucide-react';
 import { ExerciseLibrary } from './components/ExerciseLibrary';
 import { WorkoutBuilder } from './components/WorkoutBuilder';
 import { WorkoutRunner } from './components/WorkoutRunner';
@@ -26,7 +26,6 @@ function App() {
       ...prev,
       { id: generateId(), exercise, durationSeconds: 60, restSeconds: 30, sets: 3 },
     ]);
-    setTab('builder');
   }, [addedIds]);
 
   const handleUpdate = useCallback((id: string, changes: Partial<WorkoutExercise>) => {
@@ -51,16 +50,13 @@ function App() {
   const totalMin  = Math.round(totalSecs / 60);
   const totalCals = workoutExercises.reduce((a, e) => a + Math.round((e.exercise.calsBurnedPerMin * e.durationSeconds) / 60), 0);
 
+  /* ── Runner fullscreen ── */
   if (running) {
     return (
-      <div className="min-h-screen bg-[#06070f] flex items-center justify-center p-4"
-           style={{ background: 'radial-gradient(ellipse at top, rgba(99,102,241,0.07) 0%, #06070f 60%)' }}>
-        <div className="w-full max-w-md">
-          <WorkoutRunner
-            exercises={workoutExercises}
-            workoutName={workoutName}
-            onFinish={() => setRunning(false)}
-          />
+      <div className="min-h-screen flex items-center justify-center p-4"
+        style={{ background: 'radial-gradient(ellipse at top, rgba(99,102,241,0.10) 0%, #06070f 55%), #06070f' }}>
+        <div className="w-full max-w-lg bg-[#0c0e1a] rounded-3xl border border-white/[0.07] shadow-2xl overflow-hidden p-6">
+          <WorkoutRunner exercises={workoutExercises} workoutName={workoutName} onFinish={() => setRunning(false)} />
         </div>
       </div>
     );
@@ -69,58 +65,51 @@ function App() {
   return (
     <div className="min-h-screen bg-[#06070f] flex flex-col" style={{ fontFamily: "'Inter', sans-serif" }}>
 
-      {/* ── Header ── */}
-      <header className="sticky top-0 z-50 border-b border-white/[0.06] bg-[#06070f]/80 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+      {/* ══ HEADER ══════════════════════════════════════════════════════════ */}
+      <header className="sticky top-0 z-50 border-b border-white/[0.06] bg-[#06070f]/90 backdrop-blur-xl">
+        <div className="max-w-[1600px] mx-auto px-6 h-[60px] flex items-center gap-8">
 
           {/* Brand */}
-          <div className="flex items-center gap-3 flex-shrink-0">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-600 to-purple-700 flex items-center justify-center shadow-lg shadow-violet-500/30 text-lg">
-              ⚡
-            </div>
-            <div>
-              <div className="text-[15px] font-black text-white leading-none tracking-tight">ATHLEO</div>
-              <div className="text-[9px] text-slate-500 font-semibold tracking-[0.12em] uppercase leading-none mt-0.5">Football Performance</div>
-            </div>
+          <div className="flex items-center gap-2.5 flex-shrink-0">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-600 to-purple-800 flex items-center justify-center text-sm shadow-lg shadow-violet-500/30">⚡</div>
+            <span className="text-[15px] font-black text-white tracking-tight">ATHLEO</span>
           </div>
 
-          {/* Nav tabs */}
-          <div className="flex items-center gap-1 p-1 rounded-2xl bg-[#0f1120] border border-white/[0.06]">
-            <button
-              onClick={() => setTab('library')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 ${
-                tab === 'library'
-                  ? 'bg-gradient-to-r from-violet-600 to-purple-600 text-white shadow-md shadow-violet-500/30'
-                  : 'text-slate-500 hover:text-slate-200'
-              }`}
-            >
-              <BookOpen size={13} />
-              <span className="hidden sm:inline">Übungen</span>
+          {/* Nav */}
+          <nav className="flex items-center gap-1">
+            <button onClick={() => setTab('library')}
+              className={`px-3.5 py-1.5 rounded-lg text-[13px] font-semibold transition-all ${tab === 'library' ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
+              Übungen
             </button>
-            <button
-              onClick={() => setTab('builder')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 ${
-                tab === 'builder'
-                  ? 'bg-gradient-to-r from-violet-600 to-purple-600 text-white shadow-md shadow-violet-500/30'
-                  : 'text-slate-500 hover:text-slate-200'
-              }`}
-            >
-              <ListChecks size={13} />
-              <span className="hidden sm:inline">Mein Plan</span>
+            <button onClick={() => setTab('builder')}
+              className={`px-3.5 py-1.5 rounded-lg text-[13px] font-semibold transition-all flex items-center gap-1.5 ${tab === 'builder' ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
+              Mein Plan
               {workoutExercises.length > 0 && (
-                <span className="w-4 h-4 rounded-full bg-violet-500 text-white text-[9px] font-black flex items-center justify-center">
+                <span className="w-4 h-4 rounded-full bg-violet-600 text-white text-[9px] font-black flex items-center justify-center">
                   {workoutExercises.length}
                 </span>
               )}
             </button>
-          </div>
+          </nav>
 
-          {/* Start button (header) */}
+          {/* Spacer */}
+          <div className="flex-1" />
+
+          {/* Workout stats pill */}
           {workoutExercises.length > 0 && (
-            <button
-              onClick={() => setRunning(true)}
-              className="hidden sm:flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white text-xs font-black transition-all hover:scale-105 active:scale-95 shadow-lg shadow-violet-500/30"
-            >
+            <div className="hidden md:flex items-center gap-4 text-[12px] text-slate-400 border border-white/[0.07] rounded-xl px-4 py-2 bg-white/[0.03]">
+              <span className="flex items-center gap-1.5"><ListChecks size={12} className="text-violet-400" />{workoutExercises.length} Übungen</span>
+              <span className="w-px h-3 bg-white/10" />
+              <span className="flex items-center gap-1.5"><Clock size={12} className="text-sky-400" />{totalMin} min</span>
+              <span className="w-px h-3 bg-white/10" />
+              <span className="flex items-center gap-1.5"><Zap size={12} className="text-amber-400" />{totalCals} kcal</span>
+            </div>
+          )}
+
+          {/* Start button */}
+          {workoutExercises.length > 0 && (
+            <button onClick={() => setRunning(true)}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white text-[13px] font-bold transition-all hover:scale-105 active:scale-95 shadow-lg shadow-violet-500/25 flex-shrink-0">
               <Play size={13} fill="white" />
               Starten
             </button>
@@ -128,132 +117,151 @@ function App() {
         </div>
       </header>
 
-      {/* ── Main ── */}
-      <div className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 py-6 flex flex-col lg:flex-row gap-6">
-
-        {/* Left: tab content */}
-        <div className="flex-1 min-w-0">
-          <div style={{ height: 'calc(100vh - 130px)' }} className="flex flex-col">
-            {tab === 'library' ? (
+      {/* ══ CONTENT ═════════════════════════════════════════════════════════ */}
+      <div className="flex-1 max-w-[1600px] mx-auto w-full px-6 py-6">
+        {tab === 'library' ? (
+          /* ── LIBRARY: side-by-side on desktop ── */
+          <div className="flex gap-6">
+            {/* Exercise grid */}
+            <div className="flex-1 min-w-0">
               <ExerciseLibrary onAddExercise={handleAddExercise} addedIds={addedIds} />
-            ) : (
-              <WorkoutBuilder
-                exercises={workoutExercises}
-                workoutName={workoutName}
-                onNameChange={setWorkoutName}
-                onUpdate={handleUpdate}
-                onRemove={handleRemove}
-                onReorder={handleReorder}
-                onStart={() => setRunning(true)}
-              />
-            )}
-          </div>
-        </div>
-
-        {/* Right: sidebar (desktop) */}
-        <div className="hidden lg:flex flex-col gap-4 w-72 flex-shrink-0">
-
-          {/* Stats card */}
-          <div className="rounded-2xl bg-[#0f1120] border border-white/[0.06] p-5">
-            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-              <Activity size={12} className="text-violet-400" />
-              Workout-Übersicht
-            </h3>
-
-            {workoutExercises.length === 0 ? (
-              <div className="text-center py-6">
-                <div className="text-3xl mb-2 opacity-20">📋</div>
-                <p className="text-xs text-slate-600">Füge Übungen hinzu</p>
-              </div>
-            ) : (
-              <div className="space-y-1">
-                {/* Big stats */}
-                <div className="grid grid-cols-3 gap-2 mb-4">
-                  <div className="text-center p-3 rounded-xl bg-[#06070f] border border-white/[0.04]">
-                    <div className="text-xl font-black text-violet-400">{workoutExercises.length}</div>
-                    <div className="text-[9px] text-slate-600 uppercase tracking-wider mt-0.5">Übungen</div>
-                  </div>
-                  <div className="text-center p-3 rounded-xl bg-[#06070f] border border-white/[0.04]">
-                    <div className="text-xl font-black text-sky-400">{totalMin}</div>
-                    <div className="text-[9px] text-slate-600 uppercase tracking-wider mt-0.5">Min</div>
-                  </div>
-                  <div className="text-center p-3 rounded-xl bg-[#06070f] border border-white/[0.04]">
-                    <div className="text-xl font-black text-amber-400">{totalCals}</div>
-                    <div className="text-[9px] text-slate-600 uppercase tracking-wider mt-0.5">kcal</div>
-                  </div>
-                </div>
-
-                {/* Muscle groups */}
-                <p className="text-[9px] text-slate-600 uppercase tracking-widest mb-2">Muskelgruppen</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {[...new Set(workoutExercises.map((e) => e.exercise.muscleGroup))].map((m) => (
-                    <span key={m} className="text-[10px] px-2 py-0.5 rounded-lg bg-violet-500/10 border border-violet-500/20 text-violet-300 font-semibold">
-                      {m}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Start button */}
-          {workoutExercises.length > 0 && (
-            <button
-              onClick={() => setRunning(true)}
-              className="w-full py-4 rounded-2xl bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white font-black text-base flex items-center justify-center gap-3 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-2xl shadow-violet-500/30"
-            >
-              <Play size={20} fill="white" />
-              Workout starten
-            </button>
-          )}
-
-          {/* Queue preview */}
-          {workoutExercises.length > 0 && (
-            <div className="rounded-2xl bg-[#0f1120] border border-white/[0.06] p-4">
-              <h3 className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-3 flex items-center gap-1.5">
-                <Clock size={10} />
-                Reihenfolge
-              </h3>
-              <div className="space-y-1.5">
-                {workoutExercises.map((w, i) => (
-                  <div key={w.id} className="flex items-center gap-2.5 py-1">
-                    <span className="text-[10px] text-slate-600 w-4 text-right font-semibold">{i + 1}</span>
-                    <span className="text-sm">{w.exercise.emoji}</span>
-                    <span className="text-xs text-slate-300 flex-1 truncate font-medium">{w.exercise.name}</span>
-                    <span className="text-[10px] text-violet-400 font-bold">
-                      {Math.floor(w.durationSeconds / 60)}:{String(w.durationSeconds % 60).padStart(2, '0')}
-                    </span>
-                  </div>
-                ))}
-              </div>
             </div>
-          )}
 
-          {/* Info box */}
-          <div className="rounded-2xl bg-[#0f1120] border border-white/[0.06] p-4">
-            <h3 className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-3">💡 So geht's</h3>
-            <ul className="space-y-2 text-[11px] text-slate-500 leading-relaxed">
-              <li className="flex gap-2"><span className="text-violet-400 flex-shrink-0">⚽</span>Fußball-Tab für sportspezifische Übungen</li>
-              <li className="flex gap-2"><span className="text-orange-400 flex-shrink-0">🦵</span>Oberschenkel-Schutz gegen Faserrisse</li>
-              <li className="flex gap-2"><span className="text-teal-400 flex-shrink-0">🦶</span>Sprunggelenk-Schutz für Stabilität</li>
-              <li className="flex gap-2"><span className="text-violet-400 flex-shrink-0">→</span>Übung anklicken für Anleitung & Tipps</li>
-            </ul>
+            {/* Workout panel (desktop sidebar) */}
+            <div className="hidden lg:flex flex-col gap-4 w-[340px] flex-shrink-0">
+              <WorkoutSidePanel
+                exercises={workoutExercises}
+                onRemove={handleRemove}
+                onStart={() => setRunning(true)}
+                onGoToBuilder={() => setTab('builder')}
+                totalMin={totalMin}
+                totalCals={totalCals}
+              />
+            </div>
           </div>
-        </div>
+        ) : (
+          /* ── BUILDER ── */
+          <div className="max-w-2xl mx-auto">
+            <div className="mb-6">
+              <h1 className="text-2xl font-black text-white tracking-tight mb-1">Workout Builder</h1>
+              <p className="text-slate-400 text-sm">Passe deine Übungen individuell an und starte das Workout.</p>
+            </div>
+            <WorkoutBuilder
+              exercises={workoutExercises}
+              workoutName={workoutName}
+              onNameChange={setWorkoutName}
+              onUpdate={handleUpdate}
+              onRemove={handleRemove}
+              onReorder={handleReorder}
+              onStart={() => setRunning(true)}
+            />
+          </div>
+        )}
       </div>
 
-      {/* ── Mobile floating start button ── */}
-      {workoutExercises.length > 0 && tab === 'builder' && (
-        <div className="lg:hidden fixed bottom-4 left-4 right-4 z-40">
-          <button
-            onClick={() => setRunning(true)}
-            className="w-full py-4 rounded-2xl bg-gradient-to-r from-violet-600 to-purple-600 text-white font-black text-base flex items-center justify-center gap-3 shadow-2xl shadow-violet-500/40"
-          >
-            <Play size={20} fill="white" />
-            Workout starten
+      {/* Mobile add-to-workout sticky button */}
+      {workoutExercises.length > 0 && tab === 'library' && (
+        <div className="lg:hidden fixed bottom-4 left-4 right-4 z-40 flex gap-2">
+          <button onClick={() => setTab('builder')}
+            className="flex-1 py-3.5 rounded-2xl bg-[#111220] border border-white/10 text-white font-bold text-sm flex items-center justify-center gap-2">
+            <ListChecks size={16} />
+            Plan ({workoutExercises.length})
+          </button>
+          <button onClick={() => setRunning(true)}
+            className="flex-1 py-3.5 rounded-2xl bg-gradient-to-r from-violet-600 to-purple-600 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-xl shadow-violet-500/30">
+            <Play size={16} fill="white" />
+            Starten
           </button>
         </div>
       )}
+    </div>
+  );
+}
+
+/* ══ WORKOUT SIDE PANEL (desktop sidebar in library view) ════════════════════ */
+function WorkoutSidePanel({
+  exercises, onRemove, onStart, onGoToBuilder, totalMin, totalCals
+}: {
+  exercises: WorkoutExercise[];
+  onRemove: (id: string) => void;
+  onStart: () => void;
+  onGoToBuilder: () => void;
+  totalMin: number;
+  totalCals: number;
+}) {
+  return (
+    <div className="sticky top-[76px] flex flex-col gap-3">
+
+      {/* Panel header */}
+      <div className="rounded-2xl bg-[#0c0e1a] border border-white/[0.07] overflow-hidden">
+        <div className="px-5 py-4 border-b border-white/[0.06] flex items-center justify-between">
+          <div>
+            <h3 className="text-[13px] font-black text-white">Mein Workout</h3>
+            {exercises.length > 0 && (
+              <p className="text-[11px] text-slate-500 mt-0.5">{exercises.length} Übungen · {totalMin} min · {totalCals} kcal</p>
+            )}
+          </div>
+          {exercises.length > 0 && (
+            <button onClick={onGoToBuilder}
+              className="text-[11px] text-violet-400 hover:text-violet-300 flex items-center gap-0.5 transition-colors font-semibold">
+              Bearbeiten <ChevronRight size={12} />
+            </button>
+          )}
+        </div>
+
+        {exercises.length === 0 ? (
+          <div className="px-5 py-10 text-center">
+            <div className="w-14 h-14 rounded-2xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center text-2xl mx-auto mb-3">
+              <Dumbbell size={22} className="text-slate-600" />
+            </div>
+            <p className="text-[13px] text-slate-400 font-semibold mb-1">Noch leer</p>
+            <p className="text-[11px] text-slate-600 leading-relaxed">Klick auf <span className="text-violet-400">+</span> bei einer Übung um sie hinzuzufügen</p>
+          </div>
+        ) : (
+          <div className="divide-y divide-white/[0.04] max-h-[420px] overflow-y-auto">
+            {exercises.map((we, i) => (
+              <div key={we.id} className="flex items-center gap-3 px-4 py-3 hover:bg-white/[0.02] group transition-colors">
+                <span className="text-[11px] text-slate-600 w-4 text-right flex-shrink-0 font-semibold">{i + 1}</span>
+                <span className="text-base flex-shrink-0">{we.exercise.emoji}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[12px] font-semibold text-white truncate">{we.exercise.name}</p>
+                  <p className="text-[10px] text-slate-500">{Math.floor(we.durationSeconds / 60)}:{String(we.durationSeconds % 60).padStart(2,'0')} · {we.restSeconds}s Pause</p>
+                </div>
+                <button onClick={() => onRemove(we.id)}
+                  className="opacity-0 group-hover:opacity-100 text-slate-600 hover:text-red-400 transition-all text-lg leading-none flex-shrink-0">
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Start button */}
+      {exercises.length > 0 && (
+        <button onClick={onStart}
+          className="w-full py-4 rounded-2xl bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white font-black text-[15px] flex items-center justify-center gap-2.5 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-violet-500/25">
+          <Play size={18} fill="white" />
+          Workout starten
+        </button>
+      )}
+
+      {/* Tips */}
+      <div className="rounded-2xl bg-[#0c0e1a] border border-white/[0.07] p-4">
+        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">Tipps</p>
+        <ul className="space-y-2">
+          {[
+            ['⚽', 'Fußball-Tab für Athletik-Übungen'],
+            ['🦵', 'Oberschenkel-Schutz gegen Faserrisse'],
+            ['🦶', 'Sprunggelenk-Schutz & Propriozeption'],
+            ['💡', 'Übung anklicken für Anleitung'],
+          ].map(([icon, text]) => (
+            <li key={text} className="flex gap-2 text-[11px] text-slate-500 leading-relaxed">
+              <span className="flex-shrink-0">{icon}</span>{text}
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 }
